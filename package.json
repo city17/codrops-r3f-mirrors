@@ -8,11 +8,13 @@
   "dependencies": {
     "@react-three/cannon": "^0.5.3",
     "@react-three/drei": "^1.5.7",
+    "gltfjsx": "^3.0.0",
     "prettier": "^2.1.2",
     "react": "17.0.0-rc.1",
     "react-dom": "17.0.0-rc.1",
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.3",
+    "react-spring": "^9.0.0-rc.3",
     "react-three-fiber": "5.0.0-beta.12",
     "three": "0.120.1"
   },
@@ -32,10 +34,5 @@
     "not dead",
     "not ie <= 11",
     "not op_mini all"
-  ],
-  "husky": {
-    "hooks": {
-      "pre-commit": "pretty-quick"
-    }
-  }
+  ]
 }

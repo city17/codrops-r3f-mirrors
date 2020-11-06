@@ -1,7 +1,10 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import * as THREE from 'three'
-import { useFrame } from 'react-three-fiber'
+import { useFrame, useThree } from 'react-three-fiber'
 import { Text, useMatcapTexture, Octahedron, useGLTFLoader } from '@react-three/drei'
+import { animated, useSpring } from '@react-spring/three'
+import fragment from './fragment.frag'
+import vertex from './vertex.vert'
 
 import useSlerp from './use-slerp'
 import useRenderTarget from './use-render-target'
@@ -10,8 +13,8 @@ import { mirrorsData as diamondsData } from './data'
 import useLayers from './use-layers'
 
 const TEXT_PROPS = {
-  fontSize: 5,
-  font: 'https://fonts.gstatic.com/s/monoton/v10/5h1aiZUrOngCibe4TkHLRA.woff'
+  fontSize: 3,
+  font: 'https://fonts.gstatic.com/stats/Roboto+Mono/normal/400'
 }
 
 function Title({ material, texture, map, layers, ...props }) {
@@ -20,14 +23,14 @@ function Title({ material, texture, map, layers, ...props }) {
   return (
     <group {...props}>
       <Text ref={textRef} name="text-olga" depthTest={false} position={[0, -1, 0]} {...TEXT_PROPS}>
-        OLGA
+        METAALGEIT
         <meshPhysicalMaterial envMap={texture} map={map} roughness={0} metalness={1} color="#FFFFFF" />
       </Text>
     </group>
   )
 }
 
-function Diamond({ map, texture, matcap, layers, ...props }) {
+function Diamond({ map, texture, matcap, layers, nodes, ...props }) {
   const ref = useLayers(layers)
 
   useFrame(() => {
@@ -37,41 +40,87 @@ function Diamond({ map, texture, matcap, layers, ...props }) {
     }
   })
 
+  // const material = useMemo(() => new THREE.MeshMatcapMaterial({ color }), [color])
+
   return (
-    <mesh ref={ref} {...props}>
-      <meshMatcapMaterial matcap={matcap} transparent opacity={0.9} color="#14CEFF" />
-    </mesh>
+    <group ref={ref} {...props}>
+      <mesh material={nodes.mesh_0.material} geometry={nodes.mesh_0.geometry}>
+        <meshMatcapMaterial attach="material" matcap={matcap} transparent opacity={0.75} color="#14CEFF" />
+      </mesh>
+    </group>
+    // <group ref={ref} {...props}>
+    // </primitive>
   )
 }
 
 function Diamonds({ layers, ...props }) {
-  const [matcapTexture] = useMatcapTexture('2E763A_78A0B7_B3D1CF_14F209')
-  const { nodes } = useGLTFLoader(process.env.PUBLIC_URL + '/diamond.glb')
+  const [matcapTexture] = useMatcapTexture('3B3B3B_C7C7C7_878787_A4A4A4')
+  // const { nodes } = useGLTFLoader(process.env.PUBLIC_URL + '/logo.glb')
+  const { nodes } = useGLTFLoader(process.env.PUBLIC_URL + '/logo.glb')
+  // console.log(logo)
+
+  const [active, setActive] = useState(true)
+
+  const { scale } = useSpring({
+    scale: active ? [0.02, 0.02, 0.02] : [0.05, 0.05, 0.05]
+  })
 
   return (
     <group name="diamonds" {...props}>
-      {diamondsData.mirrors.map((mirror, index) => (
-        <Diamond
-          key={`diamond-${index}`}
-          name={`diamond-${index}`}
-          {...mirror}
-          geometry={nodes.Cylinder.geometry}
-          matcap={matcapTexture}
-          scale={[0.5, 0.5, 0.5]}
-          layers={layers}
-        />
-      ))}
+      {diamondsData.mirrors.map((mirror, index) => {
+        const AnimatedDiamond = animated(Diamond)
+
+        return (
+          <AnimatedDiamond
+            key={`diamond-${index}`}
+            name={`diamond-${index}`}
+            {...mirror}
+            // geometry={nodes.Cylinder.geometry}
+            // geometry={logo}
+            nodes={nodes}
+            // object={logo.scene}
+            matcap={matcapTexture}
+            scale={scale}
+            layers={layers}
+            onClick={(e) => setActive(!active)}></AnimatedDiamond>
+        )
+      })}
     </group>
   )
 }
 
 function Background({ layers, ...props }) {
   const ref = useLayers(layers)
-  const [matcapTexture] = useMatcapTexture('BA5DBA_F2BEF2_E69BE6_DC8CDC')
+  const [matcapTexture] = useMatcapTexture('385862_6D8B8D_647B80_1A2E2F')
+
+  const uniforms = {
+    u_color: { value: 0.0 },
+    u_time: { value: 0.0 },
+    u_resolution: { value: { x: 0, y: 0 } }
+  }
+
+  useThree(({ size }) => {
+    uniforms.u_resolution.value.x = size.width
+    uniforms.u_resolution.value.y = size.height
+  })
+
+  useFrame(({ clock }) => {
+    uniforms.u_time.value = clock.getElapsedTime()
+  })
 
   return (
-    <Octahedron ref={ref} name="background" args={[20, 4, 4]} {...props}>
-      <meshMatcapMaterial matcap={matcapTexture} side={THREE.BackSide} color="#FFFFFF" />
+    <Octahedron ref={ref} three={useThree()} name="background" args={[20, 4, 4]} {...props}>
+      {/* <meshMatcapMaterial matcap={matcapTexture} side={THREE.BackSide} color="#FFFFFF" /> */}
+      <shaderMaterial
+        attach="material"
+        args={[
+          {
+            uniforms: uniforms,
+            vertexShader: vertex,
+            fragmentShader: fragment
+          }
+        ]}
+      />
     </Octahedron>
   )
 }

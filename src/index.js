@@ -8,7 +8,7 @@ import Scene1 from './Scene1'
 import Scene2 from './Scene2'
 import Scene3 from './Scene3'
 
-import "./base.css"
+import './base.css'
 
 function Loader() {
   const { progress } = useProgress()
@@ -39,16 +39,16 @@ function Body() {
     <Router>
       <main>
         <div className="frame">
-          <div className="frame__title-wrap">
+          {/* <div className="frame__title-wrap">
             <h1 className="frame__title">Awesome Mirror Effect</h1>
             <p className="frame__tagline">A react-three-fiber based demo</p>
-          </div>
-          <div className="frame__links">
+          </div> */}
+          {/* <div className="frame__links">
             <a href="https://tympanus.net/Development/MenuFullGrid/">Previous demo</a>
             <a href="https://tympanus.net/codrops/?p=51167">Article</a>
             <a href="https://github.com/emmelleppi/codrops-r3f-mirrors">GitHub</a>
-          </div>
-          <div className="frame__demos">
+          </div> */}
+          {/* <div className="frame__demos">
             <NavLink to="/panna" activeClassName="frame__demo--current" className="frame__demo">
               PANNA
             </NavLink>
@@ -58,7 +58,7 @@ function Body() {
             <NavLink to="/pedro" activeClassName="frame__demo--current" className="frame__demo">
               PEDRO
             </NavLink>
-          </div>
+          </div> */}
         </div>
         <div className="content">
           <Switch>
